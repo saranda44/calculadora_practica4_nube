@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { suma, resta } from '../src/operaciones';
+import { suma, resta, multiplicacion } from '../src/operaciones';
 
 // ------------------------ Pruebas para suma -----------------------
 describe('suma', () => {
@@ -63,5 +63,37 @@ describe('resta', () => {
 
   it('lanza error si algún operando es Infinity', () => {
     expect(() => resta(Infinity, 2)).toThrow('finitos');
+  });
+});
+
+// ------------------------ Pruebas para multiplicación -----------------------
+describe('multiplicacion', () => {
+  it('multiplica dos números positivos', () => {
+    expect(multiplicacion(4, 5)).toBe(20);
+  });
+
+  it('multiplica por cero', () => {
+    expect(multiplicacion(7, 0)).toBe(0);
+    expect(multiplicacion(0, 7)).toBe(0);
+  });
+
+  it('multiplica por uno', () => {
+    expect(multiplicacion(9, 1)).toBe(9);
+  });
+
+  it('multiplica números negativos', () => {
+    expect(multiplicacion(-3, -4)).toBe(12);
+  });
+
+  it('multiplica positivo por negativo', () => {
+    expect(multiplicacion(5, -2)).toBe(-10);
+  });
+
+  it('multiplica decimales', () => {
+    expect(multiplicacion(2.5, 4)).toBe(10);
+  });
+
+  it('lanza error si algún operando es NaN', () => {
+    expect(() => multiplicacion(NaN, 2)).toThrow('finitos');
   });
 });
