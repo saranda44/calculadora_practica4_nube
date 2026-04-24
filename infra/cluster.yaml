@@ -1,0 +1,20 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: calculadora-k8s
+  region: us-east-1
+  version: "1.30"
+
+iam:
+  serviceRoleARN: arn:aws:iam::<ACCOUNT_ID>:role/LabRole
+
+managedNodeGroups:
+  - name: ng-default
+    instanceType: t3.medium
+    desiredCapacity: 2
+    minSize: 2
+    maxSize: 2
+    volumeSize: 20
+    iam:
+      instanceRoleARN: arn:aws:iam::<ACCOUNT_ID>:role/LabRole
