@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { suma, resta } from './operaciones';
+import { suma, resta, multiplicacion } from './operaciones';
 
 const app = express();
 app.use(express.json());
@@ -40,6 +40,23 @@ app.post('/resta', (req: Request, res: Response) => {
   try {
     const resultado = resta(a, b);
     return res.status(200).json({ operacion: 'resta', a, b, resultado });
+  } catch (err) {
+    const mensaje = err instanceof Error ? err.message : 'Error desconocido';
+    return res.status(400).json({ error: mensaje });
+  }
+});
+
+// ----------------------- Endpoint para multiplicación -----------------------
+app.post('/multiplicacion', (req: Request, res: Response) => {
+  const { a, b } = req.body;
+
+  if (typeof a !== 'number' || typeof b !== 'number') {
+    return res.status(400).json({ error: 'a y b deben ser números' });
+  }
+
+  try {
+    const resultado = multiplicacion(a, b);
+    return res.status(200).json({ operacion: 'multiplicacion', a, b, resultado });
   } catch (err) {
     const mensaje = err instanceof Error ? err.message : 'Error desconocido';
     return res.status(400).json({ error: mensaje });
