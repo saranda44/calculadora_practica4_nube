@@ -1,0 +1,55 @@
+name: deploy
+on:
+  # Ejecuta este workflow cuando el workflow `delivery` termina
+  workflow_run:
+    workflows: [delivery]
+    types: [completed]
+
+jobs:
+  deploy:
+    # Usa una máquina virtual limpia de GitHub Actions para ejecutar el despliegue
+    runs-on: ubuntu-latest
+    # Solo continúa si el workflow anterior terminó correctamente
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      # Descarga el código del repositorio para que el runner tenga acceso a los manifiestos de Kubernetes
+      - uses: actions/checkout@v4 
+        
+      # Instala kubectl para poder comunicarse con el clúster de Kubernetes
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.30.0'
+
+      # Crea el archivo kubeconfig a partir del secreto base64 para autenticar el acceso al clúster
+      # chmod 600: archivo kubeconfig tenga los permisos para que solo el owner lo lea
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBECONFIG_B64 }}" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      # Verifica que el runner sí pueda conectarse al clúster antes de desplegar
+      - name: Verify cluster connectivity
+        run: kubectl get nodes
+
+      # Aplica los manifiestos de despliegue y servicio para crear o actualizar los recursos en Kubernetes
+      - name: Apply manifests
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+
+      # Reinicia el deployment para forzar que los pods tomen la imagen más reciente
+      # Esto es necesario porque el tag `latest` no cambia, y Kubernetes no detectará automáticamente que hay una nueva imagen disponible
+      - name: Force rollout to pull latest image
+        run: kubectl rollout restart deployment/calculadora-deployment
+
+      # Espera a que el rollout termine correctamente antes de marcar el workflow como exitoso
+      - name: Wait for rollout to complete
+        run: kubectl rollout status deployment/calculadora-deployment --timeout=300s
+
+      # Muestra el estado final de pods y servicios para verificar que todo esté corriendo correctamente
+      - name: Show deployment status
+        run: |
+          kubectl get pods
+          kubectl get services
