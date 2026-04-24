@@ -1,0 +1,13 @@
+node_modules
+dist
+.git
+.gitignore
+.env
+*.log
+.DS_Store
+README.md
+tests
+coverage
+jest.config.js
+.github
+k8s
