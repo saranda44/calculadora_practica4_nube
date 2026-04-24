@@ -14,7 +14,16 @@ jobs:
     steps:
       # Descarga el código del repositorio para que el runner tenga acceso a los manifiestos de Kubernetes
       - uses: actions/checkout@v4 
-        
+      
+      # configurar credenciales de AWS
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+      
       # Instala kubectl para poder comunicarse con el clúster de Kubernetes
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
